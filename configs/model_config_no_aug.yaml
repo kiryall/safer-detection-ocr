@@ -1,0 +1,16 @@
+train:
+  epochs: 20
+  imgsz: 640
+  batch: 16
+  device: 0
+
+augmentation:
+  fliplr: 0.0
+  degrees: 0.0
+  scale: 0.0
+  translate: 0.0
+
+experiment:
+  name: plate_detector
+  tag: no_aug
+  
