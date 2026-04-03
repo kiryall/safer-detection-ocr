@@ -8,6 +8,7 @@ MODEL_DIR = Path(os.getenv("MODEL_DIR", "models"))
 LOG_DIR = Path(os.getenv("LOG_DIR", "logs"))
 OUTPUT_CROPS_DIR = OUTPUT_DIR / "crops"
 OUTPUT_VIS_DIR = OUTPUT_DIR / "visualizations"
+OUTPUT_METADATA_DIR = OUTPUT_DIR / "metadata"
 
 # Директории данных
 RAW_DATA_DIR = DATA_DIR / "raw"
@@ -30,3 +31,9 @@ YOLO_BEST_MODEL = YOLO_MODEL_PATH / "v1" / "best.pt"
 CONF_THRESHOLD = 0.5
 
 SAVE_VISUALIZATION = True
+
+# параметры yolo
+YOLO_CONF_THRESHOLD = 0.5
+YOLO_IOU_THRESHOLD = 0.5
+
+SUPPORTED_IMAGE_FORMATS = {".jpg", ".jpeg", ".png", ".JPG", ".JPEG"}
