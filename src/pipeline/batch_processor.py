@@ -61,7 +61,7 @@ class BatchProcessor:
         bbox = best_det["bbox"]
         conf = best_det["confidence"]
 
-        crop, crop_path = self.cropper.crop_and_save(image_path, bbox, conf)
+        crop = self.cropper.crop_and_save(image_path, bbox, conf)
 
         if crop is None:
             record["message"] = "Не удалось обрезать табличку"
@@ -72,7 +72,7 @@ class BatchProcessor:
                 "detection_confidence": conf,
                 "bbox": bbox,
                 "crop": crop,  # PIL Image
-                "crop_path": str(crop_path) if crop_path else None,
+                "crop_path": crop,
             }
         )
 
@@ -102,7 +102,6 @@ class BatchProcessor:
             except Exception as e:
                 record["message"] += f" | Renaming error: {e}"
 
-        # Note: Status is set to "success" after crop. Future implementation of OCR can update status accordingly.
         return record
 
     def process_folder(
