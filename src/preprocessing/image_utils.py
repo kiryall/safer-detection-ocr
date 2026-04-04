@@ -26,13 +26,13 @@ class ImageCropper:
         self.save_crops = save_crops
         self.crops_base_dir = Path(crops_base_dir)
 
-        if save_crops:
+        if self.save_crops:
             self.crops_base_dir.mkdir(parents=True, exist_ok=True)
-            for subdir in ["success", "low_confidence", "no_tablet"]:
+            for subdir in ["success", "low_confidence", "very_low"]:
                 (self.crops_base_dir / subdir).mkdir(exist_ok=True)
 
     def crop_and_save(
-        self, image_path: Path, bbox: List[int], confidence: float = 0.0
+    self, image_path: Path, bbox: List[int], confidence: float = 0.0
     ) -> tuple[Optional[Image.Image], Optional[Path]]:
         """
         Обрезает изображение и optionally сохраняет кроп.
@@ -55,17 +55,14 @@ class ImageCropper:
             cropped_cv = img_cv[y1:y2, x1:x2]
 
             if cropped_cv.size == 0:
-                return (
-                    img_pil,
-                    None,
-                )  # Возвращаем оригинальное изображение, если кроп пустой
-
-            cropped_pil = Image.fromarray(cv2.cvtColor(cropped_cv, cv2.COLOR_BGR2RGB))
+                # Если кроп пустой, используем оригинальное изображение для сохранения
+                cropped_pil = img_pil
+            else:
+                cropped_pil = Image.fromarray(cv2.cvtColor(cropped_cv, cv2.COLOR_BGR2RGB))
 
             crop_path = None
             if self.save_crops:
-                crop_path = self._get_crop_path(image_path.stem, confidence)
-                self._save_crop(cropped_pil, crop_path)
+                crop_path = self._save_crop(cropped_pil, image_path.stem, confidence)
 
             return cropped_pil, crop_path
 
@@ -73,20 +70,19 @@ class ImageCropper:
             logger.error(f"Ошибка при обрезке изображения {image_path}: {e}")
             return None, None
 
-    def _get_crop_path(self, stem: str, confidence: float) -> Path:
-        """Определяет путь для сохранения кропа."""
-        # Определяем папку для сохранения в зависимости от confidence
+
+    def _save_crop(self, cropped_pil: Image.Image, stem: str, confidence: float) -> Path:
+        """Сохраняет кроп в соответствующую папку. Возвращает путь сохранения."""
         if confidence >= CONF_THRESHOLD:
             subdir = "success"
-            prefix = ""
+        elif confidence >= CONF_THRESHOLD * 0.65:
+            subdir = "low_confidence"
         else:
-            subdir = "low_confidence" if confidence > 0 else "no_tablet"
-            prefix = "!" if confidence > 0 else "no_tablet"
+            subdir = "very_low"
 
-        filename = f"{prefix}{stem}.jpg"
-        return self.crops_base_dir / subdir / filename
+        filename = f"{stem}.jpg"
+        save_path = self.crops_base_dir / subdir / filename
 
-    def _save_crop(self, cropped_pil: Image.Image, save_path: Path):
-        """Сохраняет кроп в указанный путь."""
-        logger.info(f"Сохранение кропа: {save_path}")
-        cropped_pil.save(save_path, quality=95)
+        cropped_pil.save(save_path, quality=92)
+        logger.debug(f"Кроп сохранён → {save_path}")
+        return save_path
