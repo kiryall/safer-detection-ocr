@@ -14,10 +14,12 @@
 - 🌍 **Для экспедиций**: Оптимизировано для использования в полевых условиях с минимальными ресурсами.
 
 ## 📸 Скриншоты / Демо
-![Интерфейс приложения]([img\interface.png](https://github.com/kiryall/safer-detection-ocr/raw/master/img/interface.png)) 
+![Интерфейс приложения]
+<img width="2512" height="1039" alt="interface" src="https://github.com/user-attachments/assets/a0330c8e-f000-4fd2-9d33-6d1d516e274e" />
 *Главный экран Streamlit-приложения для загрузки и обработки изображений.*
 
-![Результат детекции и OCR]([img\demo.png](https://github.com/kiryall/safer-detection-ocr/raw/master/img/demo.png))  
+![Результат детекции и OCR]
+<img width="589" height="151" alt="demo" src="https://github.com/user-attachments/assets/cfab5e14-0842-4091-b974-7ef474487ff1" />
 *Пример обнаружения объектов и распознанного текста.*
 
 > 💡 **Совет для экспедиций**: Снимайте фото при хорошем освещении и избегайте размытия для лучших результатов.
