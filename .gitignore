@@ -13,4 +13,3 @@ data/
 logs/
 output/
 tests/
-*digit_detector.pt
