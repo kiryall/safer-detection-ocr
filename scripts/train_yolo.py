@@ -23,7 +23,7 @@ args = parser.parse_args()
 cfg = load_config(args.config)
 logger = setup_logging(log_file="train_yolo.log", remove_file=True)
 
-project_dir = BASE_DIR / "runs" / "detect" / cfg["experiment"]["tag"]
+project_dir = BASE_DIR / "runs" / "seg" / cfg["experiment"]["tag"]
 
 def train_yolo():
     if not YOLO_PRETRAINED_MODEL.exists():
@@ -47,10 +47,6 @@ def train_yolo():
             imgsz=cfg["train"]["imgsz"],
             batch=cfg["train"]["batch"],
             device = cfg["train"].get("device", 0),
-            fliplr=cfg["augmentation"]["fliplr"],
-            degrees=cfg["augmentation"]["degrees"],
-            scale=cfg["augmentation"]["scale"],
-            translate=cfg["augmentation"]["translate"],
             project=str(project_dir.resolve()),
             name=exp_name,
             cache=True,
@@ -71,5 +67,5 @@ def train_yolo():
 
 
 if __name__ == "__main__":
-    # python -m scripts.train_yolo --config configs/model_config_no_aug.yaml
+    # python -m scripts.train_yolo --config configs/model_config.yaml
     train_yolo()

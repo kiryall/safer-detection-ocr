@@ -1,0 +1,9 @@
+train:
+  epochs: 50
+  imgsz: 1280
+  batch: 16
+  device: 0
+
+experiment:
+  name: plate_detector
+  tag: aug

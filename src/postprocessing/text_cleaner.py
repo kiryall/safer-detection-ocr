@@ -4,7 +4,7 @@ import re
 from typing import Optional
 
 
-def clean_text(text: Optional[str]) -> Optional[str]:
+def clean_validate_text(text: Optional[str]) -> Optional[str]:
     """
     Финальная очистка и валидация номера таблички.
     
@@ -26,6 +26,7 @@ def clean_text(text: Optional[str]) -> Optional[str]:
 
     # Если есть буква — она должна быть только в конце
     match = re.match(r'^(\d+)([a-e])?$', cleaned)
+
     if match:
         return cleaned
     else:

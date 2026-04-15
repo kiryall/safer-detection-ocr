@@ -27,8 +27,6 @@ safer/
 │   └── visualizations/ (JPG files)
 │
 ├── scripts/
-│   ├── annotate_helper.py
-│   ├── check_plates.py
 │   ├── run_pipeline.py
 │   └── train_yolo.py
 │

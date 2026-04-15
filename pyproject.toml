@@ -5,8 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "colorama>=0.4.6",
     "easyocr>=1.7.2",
+    "paddleocr>=3.4.0",
+    "paddlepaddle>=3.3.1",
     "pandas>=3.0.1",
+    "scikit-learn>=1.8.0",
+    "streamlit>=1.56.0",
     "supervision>=0.27.0.post2",
     "ultralytics>=8.4.31",
 ]

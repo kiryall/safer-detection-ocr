@@ -1,14 +1,25 @@
 # src\detection\yolo_detector.py
 
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List, Union
+
 from ultralytics import YOLO
+
+from configs.config import (
+    LOGGING_CONSOLE,
+    YOLO_BEST_MODEL,
+    YOLO_CONF_THRESHOLD,
+    YOLO_IOU_THRESHOLD,
+)
+from src.preprocessing.image_utils import resize_image_if_large
 from src.utils.logger import setup_logging
 
-from configs.config import YOLO_BEST_MODEL, YOLO_CONF_THRESHOLD, YOLO_IOU_THRESHOLD
-
-
-logger = setup_logging(log_file="yolo_detector.log", console=True, remove_file=True, logger_name="yolo_detector")
+logger = setup_logging(
+    log_file="yolo_detector.log",
+    console=LOGGING_CONSOLE,
+    remove_file=True,
+    logger_name="yolo_detector",
+)
 
 
 class YOLODetector:
@@ -17,19 +28,18 @@ class YOLODetector:
     """
 
     def __init__(
-            self,
-            model_path: str = YOLO_BEST_MODEL,
-            conf_threshold: float = YOLO_CONF_THRESHOLD, # Порог confidence для детекции
-            iou_threshold: float = YOLO_IOU_THRESHOLD, # Порог IoU для NMS
-            max_det: int = 5 # Максимальное количество детекций на изображение
+        self,
+        model_path: Union[str, Path] = YOLO_BEST_MODEL,
+        conf_threshold: float = YOLO_CONF_THRESHOLD,  # Порог confidence для детекции
+        iou_threshold: float = YOLO_IOU_THRESHOLD,  # Порог IoU для NMS
+        max_det: int = 5,  # Максимальное количество детекций на изображение
     ):
-        self.model = YOLO(model_path)
+        self.model = YOLO(str(model_path))
         self.conf_threshold = conf_threshold
-        self.iou_threshold = iou_threshold        
+        self.iou_threshold = iou_threshold
         self.max_det = max_det
 
-
-    def detect_single(self, image_path: Path) -> Dict[str, Any]:
+    def detect_single(self, image_path: Union[str, Path]) -> Dict[str, Any]:
         """
         Детектирует табличку на изображении.
         Args:
@@ -38,17 +48,33 @@ class YOLODetector:
             Словарь с результатами детекции, включая координаты, confidence.
         """
         image_path = Path(image_path)
-
         logger.info(f"Детекция изображения: {image_path}")
 
         try:
+            # Получаем размеры оригинального изображения
+            from PIL import Image
+
+            original_img = Image.open(image_path)
+            original_width, original_height = original_img.size
+
+            # Загружаем и при необходимости уменьшаем изображение
+            image_array = resize_image_if_large(image_path)
+            resized_height, resized_width = image_array.shape[
+                :2
+            ]  # shape[0]=h, shape[1]=w
+
+            # Вычисляем коэффициенты масштабирования
+            scale_x = original_width / resized_width
+            scale_y = original_height / resized_height
+
             # Выполняем детекцию с помощью модели YOLO
             results = self.model.predict(
-                source=str(image_path),
+                source=image_array,
                 conf=self.conf_threshold,
                 iou=self.iou_threshold,
                 max_det=self.max_det,
                 verbose=False,
+                task="obb",
             )
 
             # Собираем все детекции в список
@@ -56,22 +82,33 @@ class YOLODetector:
 
             # Проходим по всем результатам (может быть несколько, если модель возвращает несколько слоев)
             for result in results:
-                if result.boxes is None or len(result.boxes) == 0:
+                if not hasattr(result, "obb") or result.obb is None:
                     continue
 
-                for box in result.boxes:
-                    x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
-                    conf = float(box.conf[0])
+                for obb in result.obb:
+                    data = obb.data.tolist()[0]
+                    cx, cy, w, h, angle_rad, conf, cls = data
 
-                    detections.append({
-                        "bbox": [x1, y1, x2, y2],
-                        "confidence": conf,
-                    })
+                    # Масштабируем координаты обратно к оригинальному размеру
+                    cx *= scale_x
+                    cy *= scale_y
+                    w *= scale_x
+                    h *= scale_y
 
-            # Сортируем детекции по confidence в порядке убывания
-            detections.sort(key=lambda x: x["confidence"], reverse=True)
-            
-            # Если нет детекций, возвращаем результат с сообщением об отсутствии таблички
+                    detections.append(
+                        {
+                            "type": "obb",
+                            "obb": [
+                                cx,
+                                cy,
+                                w,
+                                h,
+                                angle_rad,
+                            ],  # центр, размеры, угол в радианах
+                            "confidence": float(conf),
+                        }
+                    )
+
             if not detections:
                 return {
                     "success": False,
@@ -79,27 +116,26 @@ class YOLODetector:
                     "best_detection": None,
                     "message": "Табличка не обнаружена",
                 }
-            
+
+            detections.sort(key=lambda x: x["confidence"], reverse=True)
             best = detections[0]
 
-            # Определяем успешность детекции на основе порога confidence
-            success = best["confidence"] >= self.conf_threshold
-            
             return {
-                "success": success,
+                "success": True,
                 "detections": detections,
                 "best_detection": best,
-                "message": f"Найдено {len(detections)} объектов, лучшая conf: {best['confidence']:.3f}",
+                "message": f"Найдено {len(detections)} объектов, conf: {best['confidence']:.3f}",
             }
 
         except Exception as e:
+            logger.error(f"Ошибка детекции YOLO OBB: {e}")
             return {
                 "success": False,
                 "detections": [],
                 "best_detection": None,
-                "message": f"Ошибка при детекции YOLO: {str(e)}",
+                "message": f"Ошибка при детекции: {e}",
             }
-        
+
     def detect_batch(self, image_paths: List[str | Path]) -> List[Dict[str, Any]]:
         """Детекция списка изображений.
         Args:
