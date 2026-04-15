@@ -13,4 +13,4 @@ data/
 logs/
 output/
 tests/
-models/
+*digit_detector.pt
