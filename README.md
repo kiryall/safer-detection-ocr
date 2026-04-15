@@ -50,6 +50,18 @@ uv pip install -e .
    uv sync
    ```
 
+#### Альтернативная установка с requirements.txt
+Если вы предпочитаете использовать `requirements.txt` вместо `pyproject.toml`:
+
+1. Установите зависимости:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Установите пакет в режиме разработки:
+   ```bash
+   pip install -e .
+   ```
+
 ### Запуск
 #### CLI
 - Базовый запуск
