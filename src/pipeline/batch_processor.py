@@ -13,14 +13,11 @@ from configs.config import (
     CONFIDANCE_LEVEL_THRESHOLD,
     DEBUG_SAVE_CROPS,
     LOGGING_CONSOLE,
-    LOW_CONFIDENCE_DIR,
     OCR_ACCEPT_THRESHOLD,
     OCR_THRESHOLD,
     OUTPUT_DIR,
     SEED,
-    SUCCESS_DIR,
     SUPPORTED_IMAGE_FORMATS,
-    VERY_LOW_DIR,
     YOLO_CONF_THRESHOLD,
 )
 
@@ -139,7 +136,7 @@ class BatchProcessor:
         logger.info(f"Детекция прошла порог: {det_conf:.3f} >= {self.conf_threshold:.3f}")
 
         # 2. Кроп
-        crop, cropped_path = self.cropper.crop_obb(
+        crop, cropped_path, metadata = self.cropper.crop_obb(
             image_path=image_path,
             obb=best_det["obb"],           # формат [cx, cy, w, h, angle_rad]
             confidence=det_conf,
@@ -257,11 +254,11 @@ class BatchProcessor:
     ) -> Path:
         """Единственная запись на диск в конце пайплайна"""
         if target_group == "success":
-            target_dir = SUCCESS_DIR
+            target_dir = self.success_dir
         elif target_group == "low_confidence":
-            target_dir = LOW_CONFIDENCE_DIR
+            target_dir = self.low_conf_dir
         else:
-            target_dir = VERY_LOW_DIR
+            target_dir = self.very_low_dir
 
         if keep_name:
             target_path = target_dir / original_path.name

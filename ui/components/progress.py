@@ -43,7 +43,7 @@ def render_progress_bar():
         percent = 0
     
     # Прогресс-бар
-    progress_bar = st.progress(percent / 100.0)
+    st.progress(percent / 100.0)
     
     # Статусная строка
     cols = st.columns([3, 1])
@@ -52,11 +52,7 @@ def render_progress_bar():
     with cols[1]:
         st.text(f"{percent}%")
     
-    # Текущий файл
-    if st.session_state.progress_filename:
-        st.caption(f"🖼️ {st.session_state.progress_filename}")
-    
-    return progress_bar
+    return None
 
 
 def render_spinner(text: str = "Загрузка..."):

@@ -46,8 +46,9 @@ class ImageCropper:
     def crop_obb(
         self,
         image_path: Path,
-        obb: List[float],  # формат: [center_x, center_y, width, height, angle_radians]
-        confidence: float = 0.0,  # уверенность детекции для определения папки сохранения
+        obb: List[float],                    # [cx, cy, w, h, angle_rad]
+        confidence: float = 0.0,
+        debug: bool = False
     ) -> Tuple[Optional[Image.Image], Optional[Path], Dict]:
         """
         Обрезка и выравнивание OBB в формате xywhr.
@@ -63,68 +64,85 @@ class ImageCropper:
             cx, cy, w, h, angle_rad = obb[:5]
             angle_deg = math.degrees(angle_rad)
 
-            logger.info(
-                f"OBB-кроп: {image_path.name} | conf={confidence:.3f} | angle={angle_deg:.2f}°"
-            )
+            logger.info(f"OBB-кроп: {image_path.name} | conf={confidence:.3f} | angle={angle_deg:.1f}°")
 
             img_cv = cv2.imread(str(image_path))
             if img_cv is None:
                 logger.error(f"Не удалось загрузить {image_path}")
-                return None, None
+                return None, None, {}
 
-            # Центр в пикселях
-            center = (int(cx), int(cy))
+            orig_h, orig_w = img_cv.shape[:2]
 
-            # Создаём матрицу поворота
-            rotation_matrix = cv2.getRotationMatrix2D(center, angle_deg, 1.0)
+            # === 1. Добавляем запас (margin) — очень важно! ===
+            margin = int(max(w, h) * 0.15)   # 15% запас по размеру
+            x1 = max(0, int(cx - w/2 - margin))
+            y1 = max(0, int(cy - h/2 - margin))
+            x2 = min(orig_w, int(cx + w/2 + margin))
+            y2 = min(orig_h, int(cy + h/2 + margin))
 
-            # Поворачиваем всё изображение
+            # Вырезаем область с запасом
+            crop_rect = img_cv[y1:y2, x1:x2]
+            if crop_rect.size == 0:
+                logger.warning(f"Пустой прямоугольник для {image_path.name}")
+                cropped_pil = Image.open(image_path).convert("RGB")
+                enhanced_pil = self._enhance_for_ocr_pil(cropped_pil)
+                return enhanced_pil, None, {}
+
+            # Новые координаты центра относительно вырезанного куска
+            new_cx = cx - x1
+            new_cy = cy - y1
+
+            # === 2. Поворачиваем только вырезанный кусок ===
+            rotation_matrix = cv2.getRotationMatrix2D((new_cx, new_cy), angle_deg, 1.0)
+
             rotated = cv2.warpAffine(
-                img_cv,
+                crop_rect,
                 rotation_matrix,
-                (img_cv.shape[1], img_cv.shape[0]),
+                (x2 - x1, y2 - y1),
                 flags=cv2.INTER_CUBIC,
-                borderMode=cv2.BORDER_REPLICATE,
+                borderMode=cv2.BORDER_REPLICATE
             )
 
-            # Вычисляем координаты прямоугольника после поворота
-            half_w = w / 2
-            half_h = h / 2
+            # === 3. Обрезаем уже повёрнутое изображение по размеру таблички ===
+            rot_h, rot_w = rotated.shape[:2]
+            half_w = int(w / 2)
+            half_h = int(h / 2)
 
-            x1 = int(cx - half_w)
-            y1 = int(cy - half_h)
-            x2 = int(cx + half_w)
-            y2 = int(cy + half_h)
+            # Центр после поворота (примерно)
+            rx1 = max(0, int(new_cx - half_w))
+            ry1 = max(0, int(new_cy - half_h))
+            rx2 = min(rot_w, int(new_cx + half_w))
+            ry2 = min(rot_h, int(new_cy + half_h))
 
-            logger.debug(
-                f"Поворот OBB: {image_path.name} | угол={angle_deg:.2f}° | координаты после поворота: ({x1}, {y1}), ({x2}, {y2})"
-            )
+            final_crop = rotated[ry1:ry2, rx1:rx2]
 
-            # Обрезаем повернутое изображение
-            cropped_cv = rotated[y1:y2, x1:x2]
-
-            if cropped_cv.size == 0:
-                logger.warning(f"Пустой кроп для {image_path.name}")
-                return None, None
-            
+            if final_crop.size == 0 or final_crop.shape[0] < 30 or final_crop.shape[1] < 30:
+                logger.warning(f"Финальный кроп слишком маленький для {image_path.name}")
+                final_pil = Image.fromarray(cv2.cvtColor(crop_rect, cv2.COLOR_BGR2RGB))
             else:
-                cropped_pil = Image.fromarray(
-                    cv2.cvtColor(cropped_cv, cv2.COLOR_BGR2RGB)
-                )
+                final_pil = Image.fromarray(cv2.cvtColor(final_crop, cv2.COLOR_BGR2RGB))
 
             # Улучшение для OCR
-            enhanced_pil = self._enhance_for_ocr_pil(cropped_pil)
+            enhanced_pil = self._enhance_for_ocr_pil(final_pil)
 
-            # Сохранение кропов для отладки
+            # Сохранение для дебага
             crop_path = None
             if self.save_crops:
                 crop_path = self._save_crop(enhanced_pil, image_path.stem, confidence)
 
-            return enhanced_pil, crop_path
+            metadata = {
+                "center_x": cx, "center_y": cy,
+                "width": w, "height": h,
+                "angle_deg": angle_deg,
+                "final_width": final_crop.shape[1],
+                "final_height": final_crop.shape[0],
+            }
+
+            return enhanced_pil, crop_path, metadata
 
         except Exception as e:
             logger.error(f"Ошибка OBB-кропа {image_path.name}: {e}")
-            return None, None
+            return None, None, {}
 
     def save_original(self, image_path: Path, confidence: float) -> Path:
         """Сохраняет оригинальное изображение в соответствующую папку. Возвращает путь сохранения."""
