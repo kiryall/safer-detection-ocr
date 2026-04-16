@@ -91,6 +91,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # Ensure output directory exists
+    import os
+    os.makedirs(args.output_dir, exist_ok=True)
+
     # Запуск пайплайна с указанными аргументами
     """Базовый запуск
     python -m scripts.run_pipeline --input_dir data/raw --prefix SEFER"""

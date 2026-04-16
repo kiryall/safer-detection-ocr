@@ -30,6 +30,10 @@
 - CUDA-compatible GPU (рекомендуется для ускорения YOLO)
 
 ### Установка
+#### С помощью скрипта установки
+- На Windows: двойной клик на `install.bat` или запустите в командной строке.
+- На Linux/Mac: `./install.sh` (сделайте исполняемым: `chmod +x install.sh`)
+
 #### Одной командой (с uv)
 ```bash
 uv pip install -e .
@@ -41,7 +45,12 @@ uv pip install -e .
    git clone https://github.com/kiryall/safer-detection-ocr.git
    cd safer-detection-ocr
    ```
-2. Установите зависимости:
+2. Создайте виртуальное окружение (рекомендуется для изоляции зависимостей):
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate  # Активация на Windows
+   ```
+3. Установите зависимости:
    ```bash
    pip install -e .
    ```
@@ -53,11 +62,16 @@ uv pip install -e .
 #### Альтернативная установка с requirements.txt
 Если вы предпочитаете использовать `requirements.txt` вместо `pyproject.toml`:
 
-1. Установите зависимости:
+1. Создайте виртуальное окружение (рекомендуется для изоляции зависимостей):
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate  # Активация на Windows
+   ```
+2. Установите зависимости:
    ```bash
    pip install -r requirements.txt
    ```
-2. Установите пакет в режиме разработки:
+3. Установите пакет в режиме разработки:
    ```bash
    pip install -e .
    ```

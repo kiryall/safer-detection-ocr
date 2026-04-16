@@ -30,6 +30,9 @@ def setup_logging(
     """
     log_path = os.path.join(LOG_DIR, log_file)
 
+    # Ensure log directory exists
+    os.makedirs(LOG_DIR, exist_ok=True)
+
     if remove_file and os.path.exists(log_path):
         try:
             os.remove(log_path)
