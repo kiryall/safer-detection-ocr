@@ -57,7 +57,7 @@ echo
 
 # Upgrade pip
 echo "[→] Upgrading pip..."
-pip install --upgrade pip setuptools wheel
+python3 -m pip install --upgrade pip setuptools wheel
 if [ $? -ne 0 ]; then
     echo "[✗] Failed to upgrade pip"
     exit 1

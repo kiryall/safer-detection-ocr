@@ -72,7 +72,7 @@ echo.
 
 :: Upgrade pip
 echo [→] Upgrading pip...
-pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade pip setuptools wheel
 if errorlevel 1 (
     echo [✗] Failed to upgrade pip
     pause
