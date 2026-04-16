@@ -1,11 +1,11 @@
 @echo off
 setlocal
 
-:: SEFER Vision — GUI Runner Script (Windows)
-:: Usage: run-gui.bat [port]
-
 set SCRIPT_DIR=%~dp0
 cd /d "%SCRIPT_DIR%"
+
+:: SEFER Vision — GUI Runner Script (Windows)
+:: Usage: run-gui.bat [port]
 
 :: Default port
 set PORT=%~1

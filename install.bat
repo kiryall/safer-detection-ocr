@@ -2,6 +2,9 @@
 chcp 65001 >nul
 setlocal EnableDelayedExpansion
 
+set SCRIPT_DIR=%~dp0
+cd /d "%SCRIPT_DIR%"
+
 echo ========================================
 echo   SEFER Vision — Installation Script
 echo ========================================
