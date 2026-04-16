@@ -1,15 +1,66 @@
 [project]
 name = "safer"
 version = "0.1.0"
-description = "Add your description here"
+description = "SEFER Vision — Pipeline for plate detection and OCR using YOLO"
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "colorama>=0.4.6",
-    "numpy==1.26.4",
-    "pandas<3.0",
-    "scikit-learn<1.8",
-    "streamlit>=1.56.0",
-    "supervision>=0.27.0.post2",
-    "ultralytics>=8.4.31",
+requires-python = "==3.11.*"
+license = {text = "MIT"}
+authors = [
+    {name = "kiryall", email = "kiryall@yandex.ru"}
 ]
+keywords = ["ocr", "yolo", "detection", "computer-vision", "streamlit"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "colorama>=0.4.6,<1.0",
+    "numpy>=1.26.0,<2.0",
+    "pandas>=2.0.0,<3.0",
+    "scikit-learn>=1.4.0,<1.8",
+    "streamlit>=1.56.0,<2.0",
+    "supervision>=0.27.0",
+    "ultralytics>=8.4.31,<9.0",
+    "Pillow>=10.0.0",
+    "opencv-python>=4.8.0",
+    "tqdm>=4.66.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "black>=24.0.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+]
+gpu = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+]
+
+[project.scripts]
+safer-cli = "scripts.run_pipeline:main"
+safer-gui = "ui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "ui*", "scripts*", "configs*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

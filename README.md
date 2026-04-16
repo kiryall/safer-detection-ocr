@@ -16,10 +16,12 @@
 ## 📸 Скриншоты / Демо
 ### Интерфейс приложения
 <img width="2512" height="1039" alt="interface" src="https://github.com/user-attachments/assets/a0330c8e-f000-4fd2-9d33-6d1d516e274e" />
+
 *Главный экран Streamlit-приложения для загрузки и обработки изображений.*
 
 ### Результат детекции и OCR
 <img width="589" height="151" alt="demo" src="https://github.com/user-attachments/assets/cfab5e14-0842-4091-b974-7ef474487ff1" />
+
 *Пример обнаружения объектов и распознанного текста.*
 
 > 💡 **Совет для экспедиций**: Снимайте фото при хорошем освещении и избегайте размытия для лучших результатов.
@@ -30,79 +32,103 @@
 - CUDA-compatible GPU (рекомендуется для ускорения YOLO)
 
 ### Установка
-#### С помощью скрипта установки
-- На Windows: двойной клик на `install.bat` или запустите в командной строке.
-- На Linux/Mac: `./install.sh` (сделайте исполняемым: `chmod +x install.sh`)
 
-#### Одной командой (с uv)
-```bash
-uv pip install -e .
-```
+#### Простая установка (рекомендуется для пользователей)
+Если вы просто хотите использовать приложение без разработки:
 
-#### Поэтапно
 1. Клонируйте репозиторий:
    ```bash
    git clone https://github.com/kiryall/safer-detection-ocr.git
    cd safer-detection-ocr
    ```
-2. Создайте виртуальное окружение (рекомендуется для изоляции зависимостей):
+
+2. Запустите скрипт установки:
+   - На Windows: двойной клик на `install.bat` или запустите `install.bat` в командной строке.
+   - На Linux/Mac: сделайте исполняемым и запустите `./install.sh`:
+     ```bash
+     chmod +x install.sh
+     ./install.sh
+     ```
+
+3. Запуск:
+   - **GUI режим**: 
+     - Windows: `run-gui.bat`
+     - Linux/Mac: `./run-gui.sh`
+   - **CLI режим**:
+     - Windows: `run-cli.bat --input_dir data/raw --prefix SEFER`
+     - Linux/Mac: `./run-cli.sh --input_dir data/raw --prefix SEFER`
+
+#### Установка для разработки
+Если вы планируете вносить изменения в код или разрабатывать:
+
+1. Клонируйте репозиторий:
+   ```bash
+   git clone https://github.com/kiryall/safer-detection-ocr.git
+   cd safer-detection-ocr
+   ```
+
+2. Создайте виртуальное окружение:
    ```bash
    python -m venv venv
-   venv\Scripts\activate  # Активация на Windows
+   source venv/bin/activate  # Linux/Mac
+   # или venv\Scripts\activate на Windows
    ```
+
 3. Установите зависимости:
    ```bash
-   pip install -e .
+   pip install -e .  # Рекомендуется, использует pyproject.toml
    ```
-   Или с uv:
-   ```bash
-   uv sync
-   ```
-
-#### Альтернативная установка с requirements.txt
-Если вы предпочитаете использовать `requirements.txt` вместо `pyproject.toml`:
-
-1. Создайте виртуальное окружение (рекомендуется для изоляции зависимостей):
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # Активация на Windows
-   ```
-2. Установите зависимости:
+   Или альтернативно:
    ```bash
    pip install -r requirements.txt
+   uv sync  # Если установлен uv
    ```
-3. Установите пакет в режиме разработки:
+
+4. Для разработки установите дополнительные зависимости:
    ```bash
-   pip install -e .
+   pip install -e .[dev]
    ```
+
+5. Запуск:
+   - **GUI режим**: `streamlit run ui/app.py`
+   - **CLI режим**: `python -m scripts.run_pipeline --input_dir data/raw --prefix SEFER`
 
 ### Запуск
-#### CLI
-- Базовый запуск
-```bash
-python -m scripts.run_pipeline --input_dir data/raw --prefix SEFER
-```
-- С кастомными параметрами
-```bash
-python -m scripts.run_pipeline `
-    --input_dir data/raw `
-    --output_dir output `
-    --prefix test `
-    --yolo-conf 0.1 `
-    --ocr-conf 0.8 `
-    --conf 0.40 `
-    --confidence-level-threshold 0.8 `
-    --limit 10 `
-    --visualize `
-    --clear-output `
-    --debug_save_crops
-```
 
-#### GUI
+#### CLI режим
+Запуск из командной строки для пакетной обработки изображений.
+
+- Базовый запуск:
+  ```bash
+  python -m scripts.run_pipeline --input_dir data/raw --prefix SEFER
+  ```
+- С кастомными параметрами:
+  ```bash
+  python -m scripts.run_pipeline \
+      --input_dir data/raw \
+      --output_dir output \
+      --prefix test \
+      --yolo-conf 0.1 \
+      --ocr-conf 0.8 \
+      --conf 0.40 \
+      --confidence-level-threshold 0.8 \
+      --limit 10 \
+      --visualize \
+      --clear-output \
+      --debug_save_crops
+  ```
+
+#### GUI режим
+Веб-интерфейс для удобной работы с приложением.
+
 ```bash
 streamlit run ui/app.py
 ```
 Откройте браузер по адресу http://localhost:8501.
+
+Или используйте удобные скрипты:
+- Windows: `run-gui.bat`
+- Linux/Mac: `./run-gui.sh`
 
 ## 📋 Как использовать
 1. **Загрузка изображений**: укажите папку с фото для обработки, укажите выходную папку.

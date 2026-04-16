@@ -1,7 +1,10 @@
-colorama>=0.4.6
-numpy==1.26.4
-pandas<3.0
-scikit-learn<1.8
-streamlit>=1.56.0
-supervision>=0.27.0.post2
-ultralytics>=8.4.31
+colorama>=0.4.6,<1.0
+numpy>=1.26.0,<2.0
+pandas>=2.0.0,<3.0
+scikit-learn>=1.4.0,<1.8
+streamlit>=1.56.0,<2.0
+supervision>=0.27.0
+ultralytics>=8.4.31,<9.0
+Pillow>=10.0.0
+opencv-python>=4.8.0
+tqdm>=4.66.0
