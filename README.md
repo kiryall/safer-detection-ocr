@@ -162,7 +162,8 @@ ALLOWLIST = "0123456789"  # Разрешенные символы
 - `ALLOWLIST`: Символы для распознавания (для цифр).
 
 ## 🔬 Результаты и бенчмарки
-[📊 View Metrics Notebook](notebooks\calculate_metrics.ipynb)
+notebooks/calculate_metrics.ipynb
+[📊 View Metrics Notebook](notebooks/calculate_metrics.ipynb)
 
 - Accuracy = 0.79
 - ROC-AUC  = 0.8058
